@@ -10,8 +10,8 @@ const crear_intent = require('../src/nuevo_intent');
 const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
 const ChatbotId = "chatbot-pablot-290222";
-const ServidorDiego = 'https://chatbot-tip-backend.herokuapp.com/';
-const httpUrl = 'http://localhost:8080/';
+const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+const ServidorLocal = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 let respuesta = "";
@@ -64,7 +64,7 @@ router.post('/contexto', (req,res)=>{
       //se calcula que materias tiene aprobadas y se le responde
       let ingreso = req.body.queryResult.queryText;
         if (ingreso != "primero" || ingreso != "Primer" || ingreso != "1") {
-          fetch(ServidorDiego + 'preguntas/FAQcal6',{
+          fetch(ServidorBackend + 'preguntas/FAQcal6',{
                   method: 'POST',
                   body: JSON.stringify(body),
                   headers: { 'Content-Type': 'application/json' }
@@ -76,7 +76,7 @@ router.post('/contexto', (req,res)=>{
       //En caso de que quiera saber del primer semestre dialogflow se encarga de responder
         break;
       case "Cantidad de creditos":
-        fetch(ServidorDiego + 'preguntas/FAQcal1',{
+        fetch(ServidorBackend + 'preguntas/FAQcal1',{
                 method: 'POST',
                 body: JSON.stringify({id:usuarioPregunton}),
                 headers: { 'Content-Type': 'application/json' }
@@ -85,7 +85,7 @@ router.post('/contexto', (req,res)=>{
           .then(json => this.respuesta = json.Reply );
         break;
       case "Creditos restantes":
-        fetch(ServidorDiego + 'preguntas/FAQcal2',{
+        fetch(ServidorBackend + 'preguntas/FAQcal2',{
                 method: 'POST',
                 body: JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' }
@@ -94,7 +94,7 @@ router.post('/contexto', (req,res)=>{
           .then(json => this.respuesta = json.Reply );
         break;
       case "Pasantia":
-        fetch(ServidorDiego + 'preguntas/FAQcal3',{
+        fetch(ServidorBackend + 'preguntas/FAQcal3',{
                 method: 'POST',
                 body: JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' }
@@ -103,7 +103,7 @@ router.post('/contexto', (req,res)=>{
           .then(json => this.respuesta = json.Reply );
         break;
         case "Proyecto Final":
-          fetch(ServidorDiego + 'preguntas/FAQcal4',{
+          fetch(ServidorBackend + 'preguntas/FAQcal4',{
             method: 'POST',
             body: JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
@@ -112,7 +112,7 @@ router.post('/contexto', (req,res)=>{
       .then(json => this.respuesta = json.Reply );
         break;
         case "Clases hoy":
-          fetch(ServidorDiego + 'preguntas/FAQcal7',{
+          fetch(ServidorBackend + 'preguntas/FAQcal7',{
             method: 'POST',
             body: JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
@@ -121,7 +121,7 @@ router.post('/contexto', (req,res)=>{
       .then(json => this.respuesta = json.Reply );
         break;
         case "Clases mañana":
-          fetch(ServidorDiego + 'preguntas/FAQcal5',{
+          fetch(ServidorBackend + 'preguntas/FAQcal5',{
             method: 'POST',
             body: JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' }
@@ -192,7 +192,7 @@ bot.on('text', (ctx) => {
   if (ctx.message.text == "1" && this.codigo!=""){
     //bot.telegram.sendMessage(this.telegram_chat_id, "Se está buscando información sobre quien dicta esta materia...");
   
-    fetch(httpUrl + 'preguntas/FAQcal11',{
+    fetch(ServidorBackend + 'preguntas/FAQcal11',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
@@ -214,7 +214,7 @@ bot.on('text', (ctx) => {
     //let cod = ctx.message.text.split("-");
     //let codigo = cod[1];
 
-    fetch(httpUrl + 'preguntas/FAQcal9',{
+    fetch(ServidorBackend + 'preguntas/FAQcal9',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
@@ -233,7 +233,7 @@ bot.on('text', (ctx) => {
   }
   else if (ctx.message.text== "3" && this.codigo!=""){
     
-    fetch(httpUrl + 'preguntas/FAQcal10',{
+    fetch(ServidorBackend + 'preguntas/FAQcal10',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
@@ -252,7 +252,7 @@ bot.on('text', (ctx) => {
   }
   else if (ctx.message.text== "4" && this.codigo!=""){
 
-    fetch(httpUrl + 'preguntas/FAQcal12',{
+    fetch(ServidorBackend + 'preguntas/FAQcal12',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
@@ -271,7 +271,7 @@ bot.on('text', (ctx) => {
   }
   else if (ctx.message.text== "5" && this.codigo!=""){
 
-    fetch(httpUrl + 'preguntas/FAQcal13',{
+    fetch(ServidorBackend + 'preguntas/FAQcal13',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
@@ -290,7 +290,7 @@ bot.on('text', (ctx) => {
   }
  /* else if (ctx.message.text== "6" && this.codigo!=""){
 
-    fetch(httpUrl + 'preguntas/FAQcal8',{
+    fetch(ServidorBackend + 'preguntas/FAQcal8',{
       method: 'POST',
       body: JSON.stringify({codigo : this.codigo}),
       //body: JSON.stringify({codigo : "i2"}),
