@@ -1,18 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
-const { json } = require('body-parser');
+
+const { Telegraf } = require('telegraf');
+const bot = new Telegraf('1810837157:AAFfqea8zY4A207Ye3-z22XCnStC-s_l_Lo');
 
 const consultar_intent = require('../src/consultar_intent');
 const listar_intent = require('../src/listar_intent');
 const crear_intent = require('../src/nuevo_intent');
 const borrar_intent = require('../src/borrar_intent');
-const { response } = require('express');
-
-const serverUrl = 'http://localhost:8080/';
-const chatbotID = "chatbot-pablot-290222";
+const fetch = require('node-fetch');
+const ChatbotId = "chatbot-pablot-290222";
+const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+const ServidorLocal = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
+let respuesta = "";
+let telegram_chat_id = "";
+let codigo = "";
 
 router.get('/', (req, res) => {
     console.log("ERROR GET");
@@ -26,10 +30,12 @@ router.post('/ultima', (req, res) => {
        res.status(404).send('A ocurido un error! No se encontro lo solicitado');*/
     res.send({ Reply: this.respuesta })
 });
+
 //Atiendo los intent que funcionan con webhook
 router.post('/contexto', (req, res) => {
     const body = { id: usuarioPregunton };
     let acction = req.body.queryResult.intent.displayName;
+    console.log(acction);
 
     //Solo se respondera este tipo de preguntas a usuarios logeados
     if (usuarioPregunton == "0") {
@@ -60,7 +66,7 @@ router.post('/contexto', (req, res) => {
                 //se calcula que materias tiene aprobadas y se le responde
                 let ingreso = req.body.queryResult.queryText;
                 if (ingreso != "primero" || ingreso != "Primer" || ingreso != "1") {
-                    fetch(serverUrl + 'preguntas/FAQcal6', {
+                    fetch(ServidorBackend + 'preguntas/FAQcal6', {
                         method: 'POST',
                         body: JSON.stringify(body),
                         headers: { 'Content-Type': 'application/json' }
@@ -72,7 +78,7 @@ router.post('/contexto', (req, res) => {
                 //En caso de que quiera saber del primer semestre dialogflow se encarga de responder
                 break;
             case "Cantidad de creditos":
-                fetch(serverUrl + 'preguntas/FAQcal1', {
+                fetch(ServidorBackend + 'preguntas/FAQcal1', {
                     method: 'POST',
                     body: JSON.stringify({ id: usuarioPregunton }),
                     headers: { 'Content-Type': 'application/json' }
@@ -81,7 +87,7 @@ router.post('/contexto', (req, res) => {
                     .then(json => this.respuesta = json.Reply);
                 break;
             case "Creditos restantes":
-                fetch(serverUrl + 'preguntas/FAQcal2', {
+                fetch(ServidorBackend + 'preguntas/FAQcal2', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -90,7 +96,7 @@ router.post('/contexto', (req, res) => {
                     .then(json => this.respuesta = json.Reply);
                 break;
             case "Pasantia":
-                fetch(serverUrl + 'preguntas/FAQcal3', {
+                fetch(ServidorBackend + 'preguntas/FAQcal3', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -99,7 +105,7 @@ router.post('/contexto', (req, res) => {
                     .then(json => this.respuesta = json.Reply);
                 break;
             case "Proyecto Final":
-                fetch(serverUrl + 'preguntas/FAQcal4', {
+                fetch(ServidorBackend + 'preguntas/FAQcal4', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -108,7 +114,7 @@ router.post('/contexto', (req, res) => {
                     .then(json => this.respuesta = json.Reply);
                 break;
             case "Clases hoy":
-                fetch(serverUrl + 'preguntas/FAQcal7', {
+                fetch(ServidorBackend + 'preguntas/FAQcal7', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -117,7 +123,7 @@ router.post('/contexto', (req, res) => {
                     .then(json => this.respuesta = json.Reply);
                 break;
             case "Clases mañana":
-                fetch(serverUrl + 'preguntas/FAQcal5', {
+                fetch(ServidorBackend + 'preguntas/FAQcal5', {
                     method: 'POST',
                     body: JSON.stringify(body),
                     headers: { 'Content-Type': 'application/json' }
@@ -133,28 +139,27 @@ router.post('/contexto', (req, res) => {
     }
 });
 
-
 function getDateForHistory() {
     let date = new Date();
 
-    let year = date.getFullYear();  
+    let year = date.getFullYear();
     let month = date.getMonth() + 1;
-    let day =  date.getDate();
-    
+    let day = date.getDate();
 
-    if(month < 10) month = "0" + month;
-    if(day < 10) day = "0" + day;
-    
-    return  year + "" + month + "" +  day;
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    return year + "" + month + "" + day;
 }
 
-function getTimeForHistory(){
+function getTimeForHistory() {
     let date = new Date();
     let hours = date.getHours();
-    let minutes = date.getMinutes();  
+    let minutes = date.getMinutes();
 
-    if(hours  < 10) hours = "0" + hours;
-    if(minutes < 10) minutes = "0" + minutes;
+    if (hours < 10) hours = "0" + hours;
+    if (minutes < 10) minutes = "0" + minutes;
 
     return hours + ":" + minutes;
 }
@@ -169,7 +174,7 @@ router.post('/send-msg', (req, res) => {
             } else {
                 fetch(serverUrl + 'historial/insertUserHistory', {
                     method: 'POST',
-                    body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null}),
+                    body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
                     headers: { 'Content-Type': 'application/json' }
                 })
                     .then(response => response.json())
@@ -185,7 +190,7 @@ router.post('/send-msg', (req, res) => {
 })
 
 router.get('/listar-intent', (req, res) => {
-    listar_intent.listar_intent(chatbotID)
+    listar_intent.listar_intent(ChatbotId)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -196,7 +201,7 @@ router.get('/listar-intent', (req, res) => {
 })
 
 router.post('/nuevo-intent', (req, res) => {
-    crear_intent.crear_intent(chatbotID, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
+    crear_intent.crear_intent(ChatbotId, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -207,7 +212,7 @@ router.post('/nuevo-intent', (req, res) => {
 })
 
 router.post('/borrar-intent', (req, res) => {
-    borrar_intent.borrar_intent(chatbotID, req.body.idIntent)
+    borrar_intent.borrar_intent(ChatbotId, req.body.idIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -216,5 +221,150 @@ router.post('/borrar-intent', (req, res) => {
             console.error("ERROR:", err);
         }); // End of .catch
 })
+
+
+
+bot.on('text', (ctx) => {
+
+    let telegram_chat_id = ctx.chat.id;
+
+    console.log("el codigo ahora es: " + this.codigo);
+    if (ctx.message.text == "1" && this.codigo != "") {
+        //bot.telegram.sendMessage(this.telegram_chat_id, "Se está buscando información sobre quien dicta esta materia...");
+
+        fetch(ServidorBackend + 'preguntas/FAQcal11', {
+            method: 'POST',
+            body: JSON.stringify({ codigo: this.codigo }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json()) // expecting a json response
+            .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+            });
+    }
+    else if (ctx.message.text == "2" && this.codigo != "") {
+
+        //let cod = ctx.message.text.split("-");
+        //let codigo = cod[1];
+
+        fetch(ServidorBackend + 'preguntas/FAQcal9', {
+            method: 'POST',
+            body: JSON.stringify({ codigo: this.codigo }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json()) // expecting a json response
+            .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+            });
+    }
+    else if (ctx.message.text == "3" && this.codigo != "") {
+
+        fetch(ServidorBackend + 'preguntas/FAQcal10', {
+            method: 'POST',
+            body: JSON.stringify({ codigo: this.codigo }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json()) // expecting a json response
+            .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+            });
+    }
+    else if (ctx.message.text == "4" && this.codigo != "") {
+
+        fetch(ServidorBackend + 'preguntas/FAQcal12', {
+            method: 'POST',
+            body: JSON.stringify({ codigo: this.codigo }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json()) // expecting a json response
+            .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+            });
+    }
+    else if (ctx.message.text == "5" && this.codigo != "") {
+
+        fetch(ServidorBackend + 'preguntas/FAQcal13', {
+            method: 'POST',
+            body: JSON.stringify({ codigo: this.codigo }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json()) // expecting a json response
+            .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+            });
+    }
+    /* else if (ctx.message.text== "6" && this.codigo!=""){
+   
+       fetch(ServidorBackend + 'preguntas/FAQcal8',{
+         method: 'POST',
+         body: JSON.stringify({codigo : this.codigo}),
+         //body: JSON.stringify({codigo : "i2"}),
+         headers: { 'Content-Type': 'application/json' }
+       })
+       .then(res => res.json()) // expecting a json response
+       .then(json => {
+         this.respuesta = json.Reply
+         bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
+           bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+       })
+       .catch((err) => {
+         bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+         console.error("ERROR:", err);
+       });
+     }*/
+    else {
+        console.log("mensaje normal");
+        consultar_intent.buscar_intent(ChatbotId, ctx.message.text)
+            .then((results) => {
+                if (results.includes("asignatura-")) {
+                    let cod = results.split("-");
+                    this.codigo = cod[1];
+                    bot.telegram.sendMessage(telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                }
+                else {
+                    this.codigo = "";
+                    bot.telegram.sendMessage(telegram_chat_id, results);
+                }
+            })
+    }
+});
+
+bot.launch();
+
 
 module.exports = router;
