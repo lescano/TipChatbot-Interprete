@@ -18,6 +18,7 @@ router.get('/', (req, res) => {
     console.log("ERROR GET");
     res.send("ERROR GET");
 });
+
 router.post('/ultima', (req, res) => {
     /* if(this.respuesta == 'Debe iniciar sesion para responder esta pregunta')
        res.status(403).send('Debe iniciar sesion para responder esta pregunta');
@@ -132,20 +133,50 @@ router.post('/contexto', (req, res) => {
     }
 });
 
+
+function getDateForHistory() {
+    let date = new Date();
+
+    let year = date.getFullYear();  
+    let month = date.getMonth() + 1;
+    let day =  date.getDate();
+    
+
+    if(month < 10) month = "0" + month;
+    if(day < 10) day = "0" + day;
+    
+    return  year + "" + month + "" +  day;
+}
+
+function getTimeForHistory(){
+    let date = new Date();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();  
+
+    if(hours  < 10) hours = "0" + hours;
+    if(minutes < 10) minutes = "0" + minutes;
+
+    return hours + ":" + minutes;
+}
+
+
 router.post('/send-msg', (req, res) => {
     usuarioPregunton = req.body.id;
-    let dateTimeUy = new Date().toLocaleString("en-US", {timeZone: "America/Montevideo"})
     consultar_intent.buscar_intent(chatbotID, req.body.MSG)
         .then((results) => {
-            fetch(serverUrl + 'historial/insertUserHistory',{
-                method: 'POST',
-                body: JSON.stringify({idUser: usuarioPregunton, question: req.body.MSG, answer: results, dateTimeUy: dateTimeUy}),
-                headers:{'Content-Type': 'application/json'}
-            })
-            .then(response => response.json())
-            .then(response => {
+            if (results.includes("asignatura-")) {
                 res.send({ Reply: results })
-            });
+            } else {
+                fetch(serverUrl + 'historial/insertUserHistory', {
+                    method: 'POST',
+                    body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null}),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        res.send({ Reply: results })
+                    });
+            }
         })
         .catch((err) => {
             res.status(500).send('A ocurido un error! Con el servidor');
