@@ -172,7 +172,7 @@ router.post('/send-msg', (req, res) => {
             if (results.includes("asignatura-")) {
                 res.send({ Reply: results })
             } else {
-                fetch(serverUrl + 'historial/insertUserHistory', {
+                fetch(ServidorBackend + 'historial/insertUserHistory', {
                     method: 'POST',
                     body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
                     headers: { 'Content-Type': 'application/json' }
