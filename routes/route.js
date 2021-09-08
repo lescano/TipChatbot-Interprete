@@ -9,9 +9,9 @@ const listar_intent = require('../src/listar_intent');
 const crear_intent = require('../src/nuevo_intent');
 const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
-const ChatbotId = "chatbot-pablot-290222";
-const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-const ServidorLocal = 'http://localhost:8080/';
+const chatbotID = "chatbot-pablot-290222";
+//const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+const ServidorBackend  = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 let respuesta = "";
@@ -172,7 +172,7 @@ router.post('/send-msg', (req, res) => {
             if (results.includes("asignatura-")) {
                 res.send({ Reply: results })
             } else {
-                fetch(serverUrl + 'historial/insertUserHistory', {
+                fetch(ServidorBackend + 'historial/insertUserHistory', {
                     method: 'POST',
                     body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
                     headers: { 'Content-Type': 'application/json' }
