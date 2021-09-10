@@ -10,8 +10,8 @@ const crear_intent = require('../src/nuevo_intent');
 const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
 const chatbotID = "chatbot-pablot-290222";
-//const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-const ServidorBackend  = 'http://localhost:8080/';
+const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+//const ServidorBackend  = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 let respuesta = "";
@@ -190,7 +190,7 @@ router.post('/send-msg', (req, res) => {
 })
 
 router.get('/listar-intent', (req, res) => {
-    listar_intent.listar_intent(ChatbotId)
+    listar_intent.listar_intent(chatbotID)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -201,7 +201,7 @@ router.get('/listar-intent', (req, res) => {
 })
 
 router.post('/nuevo-intent', (req, res) => {
-    crear_intent.crear_intent(ChatbotId, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
+    crear_intent.crear_intent(chatbotID, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -212,7 +212,7 @@ router.post('/nuevo-intent', (req, res) => {
 })
 
 router.post('/borrar-intent', (req, res) => {
-    borrar_intent.borrar_intent(ChatbotId, req.body.idIntent)
+    borrar_intent.borrar_intent(chatbotID, req.body.idIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -349,7 +349,7 @@ bot.on('text', (ctx) => {
      }*/
     else {
         console.log("mensaje normal");
-        consultar_intent.buscar_intent(ChatbotId, ctx.message.text)
+        consultar_intent.buscar_intent(chatbotID, ctx.message.text)
             .then((results) => {
                 if (results.includes("asignatura-")) {
                     let cod = results.split("-");
