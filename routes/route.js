@@ -16,7 +16,8 @@ const ServidorBackend  = 'http://localhost:8080/';
 let usuarioPregunton = 0;
 let respuesta = "";
 let telegram_chat_id = "";
-let codigo = "";
+let codigo_asignatura = "";
+let cedula_usuario = "";
 
 router.get('/', (req, res) => {
     console.log("ERROR GET");
@@ -190,7 +191,7 @@ router.post('/send-msg', (req, res) => {
 })
 
 router.get('/listar-intent', (req, res) => {
-    listar_intent.listar_intent(ChatbotId)
+    listar_intent.listar_intent(chatbotID)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -201,7 +202,7 @@ router.get('/listar-intent', (req, res) => {
 })
 
 router.post('/nuevo-intent', (req, res) => {
-    crear_intent.crear_intent(ChatbotId, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
+    crear_intent.crear_intent(chatbotID, req.body.respuesta, req.body.pregunta, req.body.nombreIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -212,7 +213,7 @@ router.post('/nuevo-intent', (req, res) => {
 })
 
 router.post('/borrar-intent', (req, res) => {
-    borrar_intent.borrar_intent(ChatbotId, req.body.idIntent)
+    borrar_intent.borrar_intent(chatbotID, req.body.idIntent)
         .then((results) => {
             res.send({ Reply: results })
         }) //End of .then(results =>
@@ -223,142 +224,192 @@ router.post('/borrar-intent', (req, res) => {
 })
 
 
+bot.command('verificar', ctx => {
+    //console.log("mensaje: "+ctx.message);
+    
+    let mensaje = ctx.message.text.split(" ");
+    let id_telegram = ctx.from.id;
+    this.cedula_usuario = mensaje[1];
+
+    //con la cedula consultar si existe el usuario
+    fetch(ServidorBackend + 'usuario/detalleC', {
+        method: 'POST',
+        body: JSON.stringify({ cedula: this.cedula_usuario }),
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json()) // expecting a json response
+    .then(json => {
+        if (json.user == null){
+            bot.telegram.sendMessage(this.telegram_chat_id, 'La cédula '+this.cedula_usuario+' no se encuentras registrada en el sistema. Por favor dirigete a: https://chatbot2-tip-frontend.herokuapp.com');
+        }
+        else {
+            fetch(ServidorBackend + 'usuario/verificar', {
+                method: 'POST',
+                body: JSON.stringify({ id: json.usuario.id, id_telegram:  id_telegram}),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .catch((err) => {
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error al verificar el usuario');
+                console.error("ERROR:", err);
+            });
+        }
+     })
+    .catch((err) => {
+        bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
+        console.error("ERROR:", err);
+    });
+});
 
 bot.on('text', (ctx) => {
 
-    let telegram_chat_id = ctx.chat.id;
+    this.telegram_chat_id = ctx.chat.id;
 
-    console.log("el codigo ahora es: " + this.codigo);
-    if (ctx.message.text == "1" && this.codigo != "") {
+    if (ctx.message.text == "1" && this.codigo_asignatura != "") {
         //bot.telegram.sendMessage(this.telegram_chat_id, "Se está buscando información sobre quien dicta esta materia...");
 
         fetch(ServidorBackend + 'preguntas/FAQcal11', {
             method: 'POST',
-            body: JSON.stringify({ codigo: this.codigo }),
+            body: JSON.stringify({ codigo: this.codigo_asignatura }),
             //body: JSON.stringify({codigo : "i2"}),
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => res.json()) // expecting a json response
             .then(json => {
                 this.respuesta = json.Reply
-                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
-                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
                 console.error("ERROR:", err);
             });
     }
-    else if (ctx.message.text == "2" && this.codigo != "") {
+    else if (ctx.message.text == "2" && this.codigo_asignatura != "") {
 
         //let cod = ctx.message.text.split("-");
         //let codigo = cod[1];
 
         fetch(ServidorBackend + 'preguntas/FAQcal9', {
             method: 'POST',
-            body: JSON.stringify({ codigo: this.codigo }),
+            body: JSON.stringify({ codigo: this.codigo_asignatura }),
             //body: JSON.stringify({codigo : "i2"}),
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => res.json()) // expecting a json response
             .then(json => {
                 this.respuesta = json.Reply
-                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
-                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
                 console.error("ERROR:", err);
             });
     }
-    else if (ctx.message.text == "3" && this.codigo != "") {
+    else if (ctx.message.text == "3" && this.codigo_asignatura != "") {
 
         fetch(ServidorBackend + 'preguntas/FAQcal10', {
             method: 'POST',
-            body: JSON.stringify({ codigo: this.codigo }),
+            body: JSON.stringify({ codigo: this.codigo_asignatura }),
             //body: JSON.stringify({codigo : "i2"}),
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => res.json()) // expecting a json response
             .then(json => {
                 this.respuesta = json.Reply
-                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
-                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
                 console.error("ERROR:", err);
             });
     }
-    else if (ctx.message.text == "4" && this.codigo != "") {
+    else if (ctx.message.text == "4" && this.codigo_asignatura != "") {
 
         fetch(ServidorBackend + 'preguntas/FAQcal12', {
             method: 'POST',
-            body: JSON.stringify({ codigo: this.codigo }),
+            body: JSON.stringify({ codigo: this.codigo_asignatura }),
             //body: JSON.stringify({codigo : "i2"}),
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => res.json()) // expecting a json response
             .then(json => {
                 this.respuesta = json.Reply
-                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
-                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
                 console.error("ERROR:", err);
             });
     }
-    else if (ctx.message.text == "5" && this.codigo != "") {
+    else if (ctx.message.text == "5" && this.codigo_asignatura != "") {
 
         fetch(ServidorBackend + 'preguntas/FAQcal13', {
             method: 'POST',
-            body: JSON.stringify({ codigo: this.codigo }),
+            body: JSON.stringify({ codigo: this.codigo_asignatura }),
             //body: JSON.stringify({codigo : "i2"}),
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => res.json()) // expecting a json response
             .then(json => {
                 this.respuesta = json.Reply
-                bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
-                bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
                 console.error("ERROR:", err);
             });
     }
-    /* else if (ctx.message.text== "6" && this.codigo!=""){
-   
-       fetch(ServidorBackend + 'preguntas/FAQcal8',{
-         method: 'POST',
-         body: JSON.stringify({codigo : this.codigo}),
-         //body: JSON.stringify({codigo : "i2"}),
-         headers: { 'Content-Type': 'application/json' }
-       })
-       .then(res => res.json()) // expecting a json response
-       .then(json => {
-         this.respuesta = json.Reply
-         bot.telegram.sendMessage(telegram_chat_id, this.respuesta);
-           bot.telegram.sendMessage(telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
-       })
-       .catch((err) => {
-         bot.telegram.sendMessage(telegram_chat_id, 'A ocurido un error! Con el servidor');
-         console.error("ERROR:", err);
-       });
-     }*/
+    else if (ctx.message.text.includes("6-") && this.codigo_asignatura!=""){
+
+        let mensaje = ctx.message.text.split("-");
+        this.cedula_usuario = mensaje[1];
+
+        //con la cedula consultar si existe el usuario
+        fetch(ServidorBackend + 'usuario/detalleC', {
+            method: 'POST',
+            body: JSON.stringify({ cedula: this.cedula_usuario }),
+            //body: JSON.stringify({codigo : "i2"}),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json()) // expecting a json response
+        .then(json => {
+            console.log("id: "+json.usuario.id);
+            fetch(ServidorBackend + 'preguntas/FAQcal8',{
+                method: 'POST',
+                body: JSON.stringify({codigo : this.codigo_asignatura, id: json.usuario.id}),
+                headers: { 'Content-Type': 'application/json' }
+              })
+              .then(res => res.json()) // expecting a json response
+              .then(json => {
+                this.respuesta = json.Reply
+                bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
+                   bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6-cedula: ¿Puedo cursarla?");
+              })
+              .catch((err) => {
+                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
+                console.error("ERROR:", err);
+              });
+        })
+        .catch((err) => {
+            bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
+            console.error("ERROR:", err);
+        });
+     }
     else {
-        console.log("mensaje normal");
-        consultar_intent.buscar_intent(ChatbotId, ctx.message.text)
+        consultar_intent.buscar_intent(chatbotID, ctx.message.text)
             .then((results) => {
                 if (results.includes("asignatura-")) {
                     let cod = results.split("-");
-                    this.codigo = cod[1];
-                    bot.telegram.sendMessage(telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                    this.codigo_asignatura = cod[1];
+                    bot.telegram.sendMessage(this.telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
                 }
                 else {
-                    this.codigo = "";
-                    bot.telegram.sendMessage(telegram_chat_id, results);
+                    this.codigo_asignatura = "";
+                    bot.telegram.sendMessage(this.telegram_chat_id, results);
                 }
             })
     }
