@@ -9,9 +9,10 @@ const listar_intent = require('../src/listar_intent');
 const crear_intent = require('../src/nuevo_intent');
 const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
+const { response } = require('express');
 const chatbotID = "chatbot-pablot-290222";
 const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-//const ServidorBackend  = 'http://localhost:8080/';
+//const ServidorBackend = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 let respuesta = "";
@@ -165,39 +166,57 @@ function getTimeForHistory() {
 }
 
 
-router.post('/send-msg', (req, res) => {
-    usuarioPregunton = req.body.id;
-    consultar_intent.buscar_intent(chatbotID, req.body.MSG)
-        .then((results) => {
-            if (results.includes("asignatura-")) {
-                res.send({ Reply: results })
+router.post('/send-msg', (request, response) => {
+    usuarioPregunton = request.body.id;
+    consultar_intent.buscar_intent(chatbotID, request.body.MSG)
+        .then((resultDialogFlow) => {
+            if (resultDialogFlow.includes("asignatura-"))
+                response.send({ Reply: resultDialogFlow })
+            else if (resultDialogFlow.localeCompare('error') == 0) {
+                fetch(ServidorBackend + 'preguntas/insertUnansweredQuestion', {
+                    method: 'POST',
+                    body: JSON.stringify({ question: request.body.MSG }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(responseInsertQuestion => responseInsertQuestion.json())
+                    .then(responseInsertQuestionJson => {
+                        fetch(ServidorBackend + 'historial/insertUserHistory', {
+                            method: 'POST',
+                            body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: "No tengo una respuesta para esta pregunta 😞", currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
+                            headers: { 'Content-Type': 'application/json' }
+                        })
+                            .then(responseInsertHistory => responseInsertHistory.json())
+                            .then(responseInsertHistoryJson => {
+                                response.send({ Reply: resultDialogFlow })
+                            });
+                    });
             } else {
                 fetch(ServidorBackend + 'historial/insertUserHistory', {
                     method: 'POST',
-                    body: JSON.stringify({ idUser: usuarioPregunton, question: req.body.MSG, answer: results, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
+                    body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: resultDialogFlow, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
                     headers: { 'Content-Type': 'application/json' }
                 })
-                    .then(response => response.json())
-                    .then(response => {
-                        res.send({ Reply: results })
+                    .then(responseInsertHistory => responseInsertHistory.json())
+                    .then(responseInsertHistoryJson => {
+                        response.send({ Reply: resultDialogFlow })
                     });
             }
         })
         .catch((err) => {
-            res.status(500).send('A ocurido un error! Con el servidor');
+            response.status(500).send('A ocurido un error! Con el servidor');
             console.error("ERROR:", err);
         });
-})
+});
 
 router.get('/listar-intent', (req, res) => {
     listar_intent.listar_intent(chatbotID)
         .then((results) => {
             res.send({ Reply: results })
-        }) //End of .then(results =>
+        })
         .catch((err) => {
             res.status(500).send('A ocurido un error! Con el servidor');
             console.error("ERROR:", err);
-        }); // End of .catch
+        });
 })
 
 router.post('/nuevo-intent', (req, res) => {
@@ -208,7 +227,7 @@ router.post('/nuevo-intent', (req, res) => {
         .catch((err) => {
             res.status(500).send('A ocurido un error! Con el servidor');
             console.error("ERROR:", err);
-        }); // End of .catch
+        });
 })
 
 router.post('/borrar-intent', (req, res) => {
