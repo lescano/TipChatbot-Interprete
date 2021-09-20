@@ -8,8 +8,8 @@ const consultar_intent = require('../src/consultar_intent');
 const fetch = require('node-fetch');
 const { response } = require('express');
 const chatbotID = "chatbot-pablot-290222";
-//const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-const ServidorBackend = 'http://localhost:8080/';
+const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+//const ServidorBackend = 'http://localhost:8080/';
 
 /* VL 9/2021
 *   SOBRE TELEGRAM: los id de telegram pueden llegar a ser distintos
