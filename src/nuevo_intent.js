@@ -6,11 +6,8 @@ module.exports = {
         const intentsClient = new dialogflow.IntentsClient({
             keyFilename: require("path").join('google-credentials.json')
         });
-
-        // La ruta para identificar al agente que posee la intención creada.
         const agentPath = intentsClient.agentPath(projectId);
         const trainingPhrases = [];
-        //preguntas = [preguntas];
         respuesta = [respuesta];
 
         preguntas.forEach(pregunta => {
@@ -18,7 +15,6 @@ module.exports = {
                 text: pregunta
             };
 
-            // Aquí creamos una nueva frase de entrenamiento para cada parte proporcionada.
             let trainingPhrase = {
                 type: 'EXAMPLE',
                 parts: [part]

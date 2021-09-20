@@ -19,5 +19,5 @@ module.exports = {
         console.log(`Intent ${intentPath} deleted`);
         return result;
 
-    }// [END dialogflow_delete_intent]
-}//Fin exports
+    }
+}
