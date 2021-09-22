@@ -11,8 +11,8 @@ const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
 const { response } = require('express');
 const chatbotID = "chatbot-pablot-290222";
-const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-//const ServidorBackend = 'http://localhost:8080/';
+//const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+const ServidorBackend = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 let respuesta = "";
@@ -170,6 +170,7 @@ router.post('/send-msg', (request, response) => {
     usuarioPregunton = request.body.id;
     consultar_intent.buscar_intent(chatbotID, request.body.MSG)
         .then((resultDialogFlow) => {
+            console.log("la respuesta =>>" + resultDialogFlow);
             if (resultDialogFlow.includes("asignatura-"))
                 response.send({ Reply: resultDialogFlow })
             else if (resultDialogFlow.localeCompare('error') == 0) {
