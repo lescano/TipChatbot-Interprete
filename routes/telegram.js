@@ -229,7 +229,11 @@ bot.on('text', (ctx) => {
     else {
         consultar_intent.buscar_intent(chatbotID, ctx.message.text)
             .then((results) => {
-                if (results.includes("asignatura-")) {
+                if(results="error"){
+                    this.codigo_asignatura = "";
+                    bot.telegram.sendMessage(this.telegram_chat_id, "No tengo una respuesta para esa pregunta.");
+                }
+                else if (results.includes("asignatura-")) {
                     let cod = results.split("-");
                     this.codigo_asignatura = cod[1];
                     bot.telegram.sendMessage(this.telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
