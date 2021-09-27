@@ -8,8 +8,8 @@ const borrar_intent = require('../src/borrar_intent');
 const fetch = require('node-fetch');
 const { response } = require('express');
 const chatbotID = "chatbot-pablot-290222";
-//const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
-const ServidorBackend = 'http://localhost:8080/';
+const ServidorBackend = 'https://chatbot2-tip-backend.herokuapp.com/';
+//const ServidorBackend = 'http://localhost:8080/';
 
 let usuarioPregunton = 0;
 

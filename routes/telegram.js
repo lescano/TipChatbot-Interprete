@@ -35,55 +35,55 @@ bot.command('verificar', ctx => {
 
     this.telegram_chat_id = ctx.chat.id;
     //console.log("mensaje: "+ctx.message);
-    
+
     let mensaje = ctx.message.text.split(" ");
     let id_telegram = ctx.from.id;
     this.cedula_usuario = mensaje[1];
 
     //mediante esta llamada al backend obtengo el objeto usuario segun la cedula
     fetch(ServidorBackend + 'usuario/detalleC', {
-    method: 'POST',
-    body: JSON.stringify({ cedula: this.cedula_usuario }),
-    headers: { 'Content-Type': 'application/json' }
+        method: 'POST',
+        body: JSON.stringify({ cedula: this.cedula_usuario }),
+        headers: { 'Content-Type': 'application/json' }
     })
-    .then(res => res.json()) // expecting a json response
-    .then(json => {
-        console.log(json.usuario);
-        if (json.usuario == null){
-            bot.telegram.sendMessage(this.telegram_chat_id, 'La cédula '+this.cedula_usuario+' no se encuentras registrada en el sistema. Por favor registrate en: https://chatbot2-tip-frontend.herokuapp.com');
-        }
-        else {
-            fetch(ServidorBackend + 'usuario/verifyTelegram', {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    id: json.usuario.id, 
-                    id_telegram: id_telegram, 
-                    activo_telegram:false,
-                    frontend: false
-                }),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(json => {
+        .then(res => res.json()) // expecting a json response
+        .then(json => {
+            console.log(json.usuario);
+            if (json.usuario == null) {
+                bot.telegram.sendMessage(this.telegram_chat_id, 'La cédula ' + this.cedula_usuario + ' no se encuentras registrada en el sistema. Por favor registrate en: https://chatbot2-tip-frontend.herokuapp.com');
+            }
+            else {
+                fetch(ServidorBackend + 'usuario/verifyTelegram', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id: json.usuario.id,
+                        id_telegram: id_telegram,
+                        activo_telegram: false,
+                        frontend: false
+                    }),
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(res => res.json())
+                    .then(json => {
 
-                if (json.ok){
-                    bot.telegram.sendMessage(this.telegram_chat_id, 'Podrás activar tu usuario de telegram desde tu perfil en: https://chatbot2-tip-frontend.herokuapp.com');
-                }
-                else if (!json.ok){
-                    bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error al verificar el usuario, por favor intente más tarde');
-                    console.error("ERROR:", json.err);
-                }
-            })
-            .catch((err) => {
-                bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error al verificar el usuario, por favor intente más tarde');
-                console.error("ERROR:", err);
-            });
-        }
-     })
-    .catch((err) => {
-        bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
-        console.error("ERROR:", err);
-    });
+                        if (json.ok) {
+                            bot.telegram.sendMessage(this.telegram_chat_id, 'Podrás activar tu usuario de telegram desde tu perfil en: https://chatbot2-tip-frontend.herokuapp.com');
+                        }
+                        else if (!json.ok) {
+                            bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error al verificar el usuario, por favor intente más tarde');
+                            console.error("ERROR:", json.err);
+                        }
+                    })
+                    .catch((err) => {
+                        bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error al verificar el usuario, por favor intente más tarde');
+                        console.error("ERROR:", err);
+                    });
+            }
+        })
+        .catch((err) => {
+            bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
+            console.error("ERROR:", err);
+        });
 });
 
 bot.on('text', (ctx) => {
@@ -189,7 +189,7 @@ bot.on('text', (ctx) => {
                 console.error("ERROR:", err);
             });
     }
-    else if (ctx.message.text == "6" && this.codigo_asignatura!=""){
+    else if (ctx.message.text == "6" && this.codigo_asignatura != "") {
 
         this.id_telegram = ctx.from.id;
         //buscar en la base de datos si hay un usuario con este id de telegram
@@ -198,35 +198,34 @@ bot.on('text', (ctx) => {
             body: JSON.stringify({ id_telegram: this.id_telegram }),
             headers: { 'Content-Type': 'application/json' }
         })
-        .then(res => res.json())
-        .then(json => {
-            console.log(json.usuario);
-            if(json.usuario){       //en caso positivo se va a la FAQcalc8
+            .then(res => res.json())
+            .then(json => {
+                console.log(json.usuario);
+                if (json.usuario) {       //en caso positivo se va a la FAQcalc8
 
-                fetch(ServidorBackend + 'preguntas/FAQcal8',{
-                    method: 'POST',
-                    body: JSON.stringify({codigo : this.codigo_asignatura, id: json.usuario.id}),
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                .then(res => res.json()) // expecting a json response
-                .then(json => {
-                    this.respuesta = json.Reply
-                    bot.telegram.sendMessage(this.id_telegram, this.respuesta);
-                    bot.telegram.sendMessage(this.id_telegram, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6-cedula: ¿Puedo cursarla?");
-                })
-                .catch((err) => {
-                    bot.telegram.sendMessage(this.id_telegram, 'A ocurido un error! Con el servidor');
-                    console.error("ERROR:", err);
-                });
-            }
-            else{               //en caso negativo se pide que verifique su usuario telegram
-                bot.telegram.sendMessage(this.id_telegram, 'No se ha encontrado su usuario en el sistema.');
-                bot.telegram.sendMessage(this.id_telegram, 'Por favor active sus usuario con el comando /verificar seguido de su cédula sin puntos ni guiones');
-            }
-        })
+                    fetch(ServidorBackend + 'preguntas/FAQcal8', {
+                        method: 'POST',
+                        body: JSON.stringify({ codigo: this.codigo_asignatura, id: json.usuario.id }),
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(res => res.json()) // expecting a json response
+                        .then(json => {
+                            this.respuesta = json.Reply
+                            bot.telegram.sendMessage(this.id_telegram, this.respuesta);
+                            bot.telegram.sendMessage(this.id_telegram, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6-cedula: ¿Puedo cursarla?");
+                        })
+                        .catch((err) => {
+                            bot.telegram.sendMessage(this.id_telegram, 'A ocurido un error! Con el servidor');
+                            console.error("ERROR:", err);
+                        });
+                }
+                else {               //en caso negativo se pide que verifique su usuario telegram
+                    bot.telegram.sendMessage(this.id_telegram, 'No se ha encontrado su usuario en el sistema.');
+                    bot.telegram.sendMessage(this.id_telegram, 'Por favor active sus usuario con el comando /verificar seguido de su cédula sin puntos ni guiones');
+                }
+            })
 
-     }
-    else {
+    } else {
         consultar_intent.buscar_intent(chatbotID, ctx.message.text)
             .then((results) => {
                 if (results.includes("asignatura-")) {
