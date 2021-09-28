@@ -2,7 +2,6 @@ const dialogflow = require("@google-cloud/dialogflow");
 
 module.exports = {
     listar_intent: async function (projectId) {
-        // La ruta para identificar al agente propietario de los intents.
         const intentsClient = new dialogflow.IntentsClient({
             keyFilename: require("path").join('google-credentials.json')
         });
