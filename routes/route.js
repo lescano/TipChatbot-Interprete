@@ -164,7 +164,6 @@ router.post('/send-msg', (request, response) => {
     usuarioPregunton = request.body.id;
     consultar_intent.buscar_intent(chatbotID, request.body.MSG)
         .then((resultDialogFlow) => {
-            console.log("la respuesta =>>" + resultDialogFlow);
             if (resultDialogFlow.includes("asignatura-"))
                 response.send({ Reply: resultDialogFlow })
             else if (resultDialogFlow.localeCompare('error') == 0) {
