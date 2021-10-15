@@ -164,7 +164,7 @@ router.post('/send-msg', (request, response) => {
     usuarioPregunton = request.body.id;
     consultar_intent.buscar_intent(chatbotID, request.body.MSG)
         .then((resultDialogFlow) => {
-            if (resultDialogFlow.includes("asignatura-"))
+            if (resultDialogFlow.includes("asignatura-") || resultDialogFlow.localeCompare("getFeriados") == 0)
                 response.send({ Reply: resultDialogFlow })
             else if (resultDialogFlow.localeCompare('error') == 0) {
                 fetch(ServidorBackend + 'preguntas/insertUnansweredQuestion', {
@@ -174,26 +174,30 @@ router.post('/send-msg', (request, response) => {
                 })
                     .then(responseInsertQuestion => responseInsertQuestion.json())
                     .then(responseInsertQuestionJson => {
-                        fetch(ServidorBackend + 'historial/insertUserHistory', {
-                            method: 'POST',
-                            body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: "No tengo una respuesta para esta pregunta 😞", currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
-                            headers: { 'Content-Type': 'application/json' }
-                        })
-                            .then(responseInsertHistory => responseInsertHistory.json())
-                            .then(responseInsertHistoryJson => {
-                                response.send({ Reply: resultDialogFlow })
-                            });
+                        if (usuarioPregunton && usuarioPregunton != 0) {
+                            fetch(ServidorBackend + 'historial/insertUserHistory', {
+                                method: 'POST',
+                                body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: "No tengo una respuesta para esta pregunta 😞", currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
+                                headers: { 'Content-Type': 'application/json' }
+                            })
+                                .then(responseInsertHistory => responseInsertHistory.json())
+                                .then(responseInsertHistoryJson => {
+                                    response.send({ Reply: resultDialogFlow })
+                                });
+                        } else response.send({ Reply: resultDialogFlow });
                     });
             } else {
-                fetch(ServidorBackend + 'historial/insertUserHistory', {
-                    method: 'POST',
-                    body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: resultDialogFlow, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                    .then(responseInsertHistory => responseInsertHistory.json())
-                    .then(responseInsertHistoryJson => {
-                        response.send({ Reply: resultDialogFlow })
-                    });
+                if (usuarioPregunton && usuarioPregunton != 0) {
+                    fetch(ServidorBackend + 'historial/insertUserHistory', {
+                        method: 'POST',
+                        body: JSON.stringify({ idUser: usuarioPregunton, question: request.body.MSG, answer: resultDialogFlow, currentDate: getDateForHistory(), currentTime: getTimeForHistory(), subjectCode: null }),
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(responseInsertHistory => responseInsertHistory.json())
+                        .then(responseInsertHistoryJson => {
+                            response.send({ Reply: resultDialogFlow })
+                        });
+                } else response.send({ Reply: resultDialogFlow });
             }
         })
         .catch((err) => {
