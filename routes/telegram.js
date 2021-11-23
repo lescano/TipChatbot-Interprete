@@ -103,7 +103,7 @@ bot.on('text', (ctx) => {
             .then(json => {
                 this.respuesta = json.Reply
                 bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
                 bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
@@ -125,7 +125,7 @@ bot.on('text', (ctx) => {
             .then(json => {
                 this.respuesta = json.Reply
                 bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
                 bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
@@ -144,7 +144,7 @@ bot.on('text', (ctx) => {
             .then(json => {
                 this.respuesta = json.Reply
                 bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
                 bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
@@ -163,7 +163,7 @@ bot.on('text', (ctx) => {
             .then(json => {
                 this.respuesta = json.Reply
                 bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
                 bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
@@ -182,7 +182,7 @@ bot.on('text', (ctx) => {
             .then(json => {
                 this.respuesta = json.Reply
                 bot.telegram.sendMessage(this.telegram_chat_id, this.respuesta);
-                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                bot.telegram.sendMessage(this.telegram_chat_id, "¿Deseas saber algo más?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
             })
             .catch((err) => {
                 bot.telegram.sendMessage(this.telegram_chat_id, 'A ocurido un error! Con el servidor');
@@ -235,7 +235,7 @@ bot.on('text', (ctx) => {
                 else if (results.includes("asignatura-")) {
                     let cod = results.split("-");
                     this.codigo_asignatura = cod[1];
-                    bot.telegram.sendMessage(this.telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga");//, 6: ¿Puedo cursarla?");
+                    bot.telegram.sendMessage(this.telegram_chat_id, "¿Qué deseas saber sobre esta asignatúra?: 1: ¿Quién la dicta?, 2: Horarios, 3: Evaluaciones, 4: Límite de inscripción, 5: Créditos que otorga, 6: ¿Puedo cursarla?");
                 }
                 else {
                     this.codigo_asignatura = "";
