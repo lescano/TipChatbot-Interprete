@@ -228,7 +228,7 @@ bot.on('text', (ctx) => {
     } else {
         consultar_intent.buscar_intent(chatbotID, ctx.message.text)
             .then((results) => {
-                if(results="error"){
+                if(results == "error"){
                     this.codigo_asignatura = "";
                     bot.telegram.sendMessage(this.telegram_chat_id, "No tengo una respuesta para esa pregunta.");
                 }
